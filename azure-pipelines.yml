@@ -84,8 +84,12 @@ stages:
           - task: AzureWebApp@1
             displayName: 'Azure App Service Deploy: website'
             inputs:
-              azureSubscription: 'Resource Manager - Tailspin - Space Game'
-              appName: '$(WebAppNameDev)'
+            inputs:
+              ConnectionType: 'AzureRM'
+              azureSubscription: 'Azure subscription 1'
+              appType: 'webApp'
+              WebAppName: '$(WebAppNameDev)'
+              ResourceGroupName: 'tailspin-space-game-rg'
               package: '$(Pipeline.Workspace)/drop/$(buildConfiguration)/*.zip'
 
 - stage: 'Test'
@@ -107,8 +111,11 @@ stages:
           - task: AzureWebApp@1
             displayName: 'Azure App Service Deploy: website'
             inputs:
-              azureSubscription: 'Resource Manager - Tailspin - Space Game'
-              appName: '$(WebAppNameTest)'
+              ConnectionType: 'AzureRM'
+              azureSubscription: 'Azure subscription 1'
+              appType: 'webApp'
+              WebAppName: '$(WebAppNameTest)'
+              ResourceGroupName: 'tailspin-space-game-rg'
               package: '$(Pipeline.Workspace)/drop/$(buildConfiguration)/*.zip'
 
 - stage: 'Staging'
@@ -130,6 +137,24 @@ stages:
           - task: AzureWebApp@1
             displayName: 'Azure App Service Deploy: website'
             inputs:
-              azureSubscription: 'Resource Manager - Tailspin - Space Game'
+              ConnectionType: 'AzureRM'
+              azureSubscription: 'Azure subscription 1'
+              appType: 'webApp'
+              WebappName: '$(WebAppNameStaging)'
+              package: '$(Pipeline.Workspace)/drop/$(buildConfiguration)/*.zip'
+              deployToSlotOrASE: 'true'
+              resourceGroupName: 'tailspin-space-game-rg'
+              slotName: 'swap'
               appName: '$(WebAppNameStaging)'
               package: '$(Pipeline.Workspace)/drop/$(buildConfiguration)/*.zip'
+          - task: AzureAppServiceManage@0
+            displayName: 'Swap deployment slots'
+            inputs:
+              ConnectionType: 'AzureRM'
+              azureSubscription: 'Azure subscription 1'
+              appType: 'webApp'
+              WebAppName: '$(WebAppNameStaging)'
+              ResourceGroupName: 'tailspin-space-game-rg'
+              sourceSlot: 'swap'
+              targetSlot: 'production'
+              action: 'Swap Slots'
